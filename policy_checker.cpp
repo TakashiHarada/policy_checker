@@ -2,7 +2,7 @@
 
 int main (int argc, char *argv[])
 {
-  if (3 != argc) { 
+  if (4 != argc) { 
     fprintf(stderr, "ERROR! Arguments are invalid.\nUsage: $ ./policy_checker [-c] rulelist1\nExample: $ ./filter -c rulelist1\n");
     exit(1);
   }
@@ -14,6 +14,8 @@ int main (int argc, char *argv[])
   else if (!strcmp(argv[1], "-c")) { /* Class Bench Rule List */
     std::vector<CRule> R = readClassBenchRulelist(argv[2]);
     addDefaultRule(&R);
+
+    std::vector<CRule> R2 = readClassBenchRulelist(argv[3]);
     
     // for (unsigned i = 0; i < R.size(); ++i)
     //   std::cout << R[i] << std::endl;
@@ -22,13 +24,20 @@ int main (int argc, char *argv[])
     DdManager *gbm; /* Global BDD manager. */
     gbm = Cudd_Init(CLASS_BENCH_RULE_LENGTH, CLASS_BENCH_RULE_LENGTH, CUDD_UNIQUE_SLOTS,CUDD_CACHE_SLOTS, 0); /* Initialize a new BDD manager. */
     DdNode* PB = makePolicyBDD(gbm, R);
+    DdNode* PB2 = makePolicyBDD(gbm, R2);
+
+    if (PB == PB2)
+      printf("OK\n");
+    else
+      printf("NO\n");
+    
     printf("The number of nodes (BDD) = %d\n", Cudd_DagSize(PB));
     Cudd_Quit(gbm);
 
-    DdManager *gzm = Cudd_Init(CLASS_BENCH_RULE_LENGTH, CLASS_BENCH_RULE_LENGTH, CUDD_UNIQUE_SLOTS,CUDD_CACHE_SLOTS, 0);
-    DdNode* PZ = makePolicyZDD(gzm, R);
-    printf("The number of nodes (ZDD) = %d\n", Cudd_DagSize(PZ));
-    Cudd_Quit(gzm);
+    // DdManager *gzm = Cudd_Init(CLASS_BENCH_RULE_LENGTH, CLASS_BENCH_RULE_LENGTH, CUDD_UNIQUE_SLOTS,CUDD_CACHE_SLOTS, 0);
+    // DdNode* PZ = makePolicyZDD(gzm, R);
+    // printf("The number of nodes (ZDD) = %d\n", Cudd_DagSize(PZ));
+    // Cudd_Quit(gzm);
     
   }
   return 0; 
