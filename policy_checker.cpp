@@ -13,7 +13,7 @@ int main (int argc, char *argv[])
   }
   else if (!strcmp(argv[1], "-c")) { /* Class Bench Rule List */
     std::vector<CRule> R = readClassBenchRulelist(argv[2]);
-    addDefaultRule(&R);
+    // addDefaultRule(&R);
 
     std::vector<CRule> R2 = readClassBenchRulelist(argv[3]);
     
