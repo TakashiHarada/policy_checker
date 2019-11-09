@@ -121,8 +121,153 @@ public :
   std::string getPROT() { return prot; }
   static int getRuleLength() { return ruleLength; }
 
+  // For Sugar
+  std::string toSugarForm(const unsigned, const unsigned);
+  std::string makeRuleString(const unsigned, const unsigned);
+  std::string getSugarSA(const unsigned, const unsigned);
+  std::string makeSATerm(const unsigned);
+  std::string getSugarDA(const unsigned, const unsigned);
+  std::string makeDATerm(const unsigned);
+  std::string getSugarSP(const unsigned, const unsigned);
+  std::string getSugarDP(const unsigned, const unsigned);
+  std::string makePROTTerm(const unsigned);
+  std::string getSugarPROT(const unsigned, const unsigned);
   friend std::ostream& operator<<(std::ostream&, const CRule&);
 };
+
+std::string CRule::makeRuleString(const unsigned rulelist_number, const unsigned rule_number) {
+  std::string ss = "r";
+  ss += std::to_string(rulelist_number);
+  ss += "_";
+  ss += std::to_string(rule_number);
+  return ss;
+}
+
+std::string trueTerm(const std::string s) {
+  std::string ss = "(iff ";
+  ss += s;
+  ss += " true)";
+  return ss;
+}
+
+std::string CRule::makeSATerm(const unsigned bitPos) {
+  std::string t = "(= sa";
+  t += std::to_string(bitPos);
+  if ('1' == sa[bitPos])
+    t += " 1)";
+  else
+    t += " 0)";
+  return t;
+}
+
+std::string CRule::getSugarSA(const unsigned rulelist_number, const unsigned rule_number) {
+  std::string sa = "(bool "; sa += makeRuleString(rulelist_number, rule_number); sa += "_sa)\n";
+  std::string sa0 = makeRuleString(rulelist_number, rule_number); sa0 += "_sa";
+  // sa += trueTerm(sa0); sa += "\n";
+  sa += "(iff "; sa += makeRuleString(rulelist_number, rule_number); sa += "_sa";
+  sa += " (and ";
+  for (unsigned i = 0; i < 32; ++i) {
+    sa += makeSATerm(i);
+    if (31 != i)
+      sa += " ";
+  }
+  sa += "))";
+  return sa;
+}
+
+std::string CRule::makeDATerm(const unsigned bitPos) {
+  std::string t = "(= da";
+  t += std::to_string(bitPos);
+  if ('1' == da[bitPos])
+    t += " 1)";
+  else
+    t += " 0)";
+  return t;
+}
+
+std::string CRule::getSugarDA(const unsigned rulelist_number, const unsigned rule_number) {
+  std::string da = "(bool "; da += makeRuleString(rulelist_number, rule_number); da += "_da)\n";
+  std::string da0 = makeRuleString(rulelist_number, rule_number); da0 += "_da";
+  // da += trueTerm(da0); da += "\n";
+  da += "(iff "; da += makeRuleString(rulelist_number, rule_number); da += "_da";
+  da += " (and ";
+  for (unsigned i = 0; i < 32; ++i) {
+    da += makeDATerm(i);
+    if (31 != i)
+      da += " ";
+  }
+  da += "))";
+   
+  return da;
+}
+
+std::string CRule::getSugarSP(const unsigned rulelist_number, const unsigned rule_number) {
+  std::string ssp = "(bool "; ssp += makeRuleString(rulelist_number, rule_number); ssp += "_sp)\n";
+  std::string ssp0 = makeRuleString(rulelist_number, rule_number); ssp0 += "_sp";
+  // ssp += trueTerm(ssp0); ssp += "\n";
+  ssp += "(iff "; ssp += makeRuleString(rulelist_number, rule_number); ssp += "_sp";
+  ssp += " (and (<= "; ssp += std::to_string(sp.first); ssp += " sp) (<= sp "; ssp += std::to_string(sp.second); ssp += ")))";
+  return ssp;
+}
+
+std::string CRule::getSugarDP(const unsigned rulelist_number, const unsigned rule_number) {
+  std::string sdp = "(bool "; sdp += makeRuleString(rulelist_number, rule_number); sdp += "_dp)\n";
+  std::string sdp0 = makeRuleString(rulelist_number, rule_number); sdp0 += "_dp";
+  // sdp += trueTerm(sdp0); sdp += "\n";
+  sdp += "(iff "; sdp += makeRuleString(rulelist_number, rule_number); sdp += "_dp";
+  sdp += " (and (<= "; sdp += std::to_string(dp.first); sdp += " dp) (<= dp "; sdp += std::to_string(dp.second); sdp += ")))";
+  return sdp;
+}
+
+std::string CRule::makePROTTerm(const unsigned bitPos) {
+  std::string t = "(= prot";
+  t += std::to_string(bitPos);
+  if ('1' == prot[bitPos])
+    t += " 1)";
+  else
+    t += " 0)";
+  return t;
+}
+
+std::string CRule::getSugarPROT(const unsigned rulelist_number, const unsigned rule_number) {
+  std::string prot = "(bool "; prot += makeRuleString(rulelist_number, rule_number); prot += "_prot)\n";
+  std::string prot0 = makeRuleString(rulelist_number, rule_number); prot0 += "_prot";
+  // prot += trueTerm(prot0); prot += "\n";
+  prot += "(iff "; prot += makeRuleString(rulelist_number, rule_number); prot += "_prot";
+  prot += " (and ";
+  for (unsigned i = 0; i < 8; ++i) {
+    prot += makePROTTerm(i);
+    if (7 != i)
+      prot += " ";
+  }
+  prot += "))";
+  return prot;
+}
+
+std::string CRule::toSugarForm(const unsigned rulelist_number, const unsigned rule_number) {
+  std::string lf = "";
+  std::string sa = getSugarSA(rulelist_number, rule_number);
+  lf += sa; lf += "\n";
+  std::string da = getSugarDA(rulelist_number, rule_number);
+  lf += da; lf += "\n";
+  std::string sp = getSugarSP(rulelist_number, rule_number);
+  lf += sp; lf += "\n";
+  std::string dp = getSugarDP(rulelist_number, rule_number);
+  lf += dp; lf += "\n";
+  std::string prot = getSugarPROT(rulelist_number, rule_number);
+  lf += prot; lf += "\n";
+
+  std::string rst = makeRuleString(rulelist_number, rule_number);
+  lf += "(iff "; lf += rst; lf += " (and ";
+  lf += rst; lf += "_sa ";
+  lf += rst; lf += "_da ";
+  lf += rst; lf += "_sp ";
+  lf += rst; lf += "_dp ";
+  lf += rst; lf += "_prot";
+  lf += "))";
+  
+  return lf;
+}
 
 std::ostream& operator<<(std::ostream& stream, const CRule& r)
 {
@@ -134,6 +279,74 @@ std::ostream& operator<<(std::ostream& stream, const CRule& r)
   stream << r.prot;
   return stream;
 };
+
+void declareVariables() {
+  // Source Address
+  for (unsigned i = 0; i < 32; ++i)
+    std::cout << "(int sa" << i << " 0 1)" << std::endl;
+  
+  // Destination Address
+  for (unsigned i = 0; i < 32; ++i)
+    std::cout << "(int da" << i << " 0 1)" << std::endl;
+
+  // Source Port Number
+  std::cout << "(int sp 0 65535)" << std::endl;
+  
+  // Destination Port Number
+  std::cout << "(int dp 0 65535)" << std::endl;
+
+  // Protocol
+  for (unsigned i = 0; i < 8; ++i)
+    std::cout << "(int prot" << i << " 0 1)" << std::endl;
+}
+
+void declareRules(const unsigned n, const unsigned rulelist_number) {
+  for (unsigned i = 0; i < n; ++i)
+    std::cout << "(bool r" << rulelist_number << "_" << i << ")" << std::endl;
+}
+
+int getLastPermitRuleNumber(std::vector<CRule>& R) {
+  int last = -1;
+  for (unsigned i = 0; i < R.size(); ++i)
+    if ('A' == R[i].getAction())
+      last = i;
+  return last;
+}
+
+void printSugarForm(std::vector<CRule>& R, const unsigned rulelist_number, const bool flag) {
+  const int last_permit = getLastPermitRuleNumber(R);
+  if (-1 == last_permit) {
+    // FIXME
+    // Input Rule List has no Accept Rule.
+    return;
+  }
+  if (0 == last_permit) {
+    // FIXME
+    // Input Rule List has just one Accept Rule.
+    return;
+  }
+
+  if (flag)
+    declareVariables();
+  declareRules(R.size(), rulelist_number);
+  
+  for (unsigned i = 0; i <= (unsigned)last_permit; ++i)
+    std::cout << R[i].toSugarForm(rulelist_number, i) << std::endl;
+
+  std::cout << "(bool R" << std::to_string(rulelist_number) << ")\n";
+  std::cout << "(iff R" << std::to_string(rulelist_number) << " (or";
+  for (unsigned i = 0; i < (unsigned)last_permit; ++i) {
+    std::string tt = R[i].makeRuleString(rulelist_number, i);
+    if ('A' == R[i].getAction())
+      std::cout << " (or " << tt;
+    else
+      std::cout << " (and (not " << tt << ")";
+  }
+  std::cout << " " << R[last_permit].makeRuleString(rulelist_number, last_permit);
+  for (unsigned i = 0; i <= (unsigned)last_permit; ++i)
+    std::cout << ")";
+  std::cout << ")" << std::endl;
+}
 
 void addDefaultRule(std::vector<CRule>* R) {
   unsigned i = R->size();
