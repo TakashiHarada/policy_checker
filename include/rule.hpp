@@ -310,7 +310,7 @@ std::string CRule::getSugarDP(const unsigned rulelist_number, const unsigned rul
 	sdp += ")";
       }
     if (1 == counter)
-      sdp += " true";
+      sdp += " false";
     sdp += "))\n";
     return sdp;
   }
