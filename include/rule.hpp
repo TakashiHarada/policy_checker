@@ -260,7 +260,7 @@ std::string CRule::getSugarSP(const unsigned rulelist_number, const unsigned rul
 	ssp += ")";
       }
     if (1 == counter)
-      ssp += " true";
+      ssp += " false";
     ssp += "))\n";
     return ssp;
   }
