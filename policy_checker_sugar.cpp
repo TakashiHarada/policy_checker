@@ -22,6 +22,7 @@ int main (int argc, char *argv[])
     // char filename[30];
 
     printSugarForm(R, 0, true);
+        
     std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
     printSugarForm(R2, 2, false);
     std::cout << "(not (iff R0 R2))" << std::endl;
